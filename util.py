@@ -1,3 +1,4 @@
+import argparse
 import re
 
 # Helper function to convert "75rb" to "75000"
@@ -18,5 +19,9 @@ def add_sum(df):
     # Assign sum of all rows of DataFrame as a new row
     return df._append(df_sum.transpose())
     
+def getFilePath():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--file', dest='chatFile', type=str, help='Input chat file path')
+    return parser.parse_args().chatFile
 
 date_pattern = re.compile(r"(\d{2})/(\d{2})/(\d{4}), (\d{2}):(\d{2})")  # Matches dd/mm/yyyy

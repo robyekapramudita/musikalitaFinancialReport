@@ -1,16 +1,15 @@
-import argparse
 import pandas as pd
 import re
-from util import parse_amount, add_sum, date_pattern
+from util import parse_amount, add_sum, getFilePath, date_pattern
 from datetime import datetime
 from collections import defaultdict
 
 # Regex patterns for dates and payment method lines
 payment_patterns = {
-    "BCA": re.compile(r"(?i)•\s*BCA\s*:\s*(\b\d{1,3}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
-    "QRIS": re.compile(r"(?i)•\s*QRIS\s*:\s*(\b\d{1,3}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
-    "CASH": re.compile(r"(?i)•\s*CASH\s*:\s*(\b\d{1,3}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
-    "GOPAY": re.compile(r"(?i)•\s*GOPAY\s*:\s*(\b\d{1,3}(?:\.\d{3})*(?:\s*rb)?\b)?\s*")
+    "BCA": re.compile(r"(?i)•\s*BCA\s*:\s*(\b\d{1,7}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
+    "QRIS": re.compile(r"(?i)•\s*QRIS\s*:\s*(\b\d{1,7}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
+    "CASH": re.compile(r"(?i)•\s*CASH\s*:\s*(\b\d{1,7}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
+    "GOPAY": re.compile(r"(?i)•\s*GOPAY\s*:\s*(\b\d{1,7}(?:\.\d{3})*(?:\s*rb)?\b)?\s*")
 }
 
 current_month = None
@@ -64,10 +63,7 @@ def write_to_excel(monthly_data):
 
 # Main execution
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--file', dest='chatFile', type=str, help='Input chat file path')
-    args = parser.parse_args()
-    chat_file = args.chatFile  # Path to your exported WhatsApp chat file
+    chat_file = getFilePath() # Path to your exported WhatsApp chat file
     monthly_data = process_chat_data(chat_file)
     # print(monthly_data)
     write_to_excel(monthly_data)
