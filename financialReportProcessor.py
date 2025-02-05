@@ -1,19 +1,11 @@
 import argparse
 import pandas as pd
 import re
-import json
+from util import parse_amount, add_sum, date_pattern
 from datetime import datetime
 from collections import defaultdict
-from openpyxl import Workbook
-
-# Helper function to convert "75rb" to "75000"
-def parse_amount(amount_text):
-    if not amount_text:
-        return 0
-    return int(amount_text.replace('rb', '').replace('.', '').replace(' ', '')) * 1000
 
 # Regex patterns for dates and payment method lines
-date_pattern = re.compile(r"(\d{2})/(\d{2})/(\d{4}), (\d{2}):(\d{2})")  # Matches dd/mm/yyyy
 payment_patterns = {
     "BCA": re.compile(r"(?i)•\s*BCA\s*:\s*(\b\d{1,3}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
     "QRIS": re.compile(r"(?i)•\s*QRIS\s*:\s*(\b\d{1,3}(?:\.\d{3})*(?:\s*rb)?\b)?\s*"),
@@ -59,17 +51,14 @@ def write_to_excel(monthly_data):
     summary = defaultdict(lambda: defaultdict(int))
     for sheet,data in monthly_data.items():
         df = pd.DataFrame(data).T.iloc[:, [1, 2, 3, 4, 0]]
-        sum = df.sum()
-        sum.name = 'Total'
+        df_sum = df.sum()
         # Assign sum of all rows of DataFrame as a new row
-        df = df._append(sum.transpose())
-        summary[sheet] = sum.to_dict()
+        df = add_sum(df)
+        summary[sheet] = df_sum.to_dict()
         df.to_excel(writer, sheet_name=sheet,index=True)
     summary_df = pd.DataFrame(summary).T
-    sum = summary_df.sum()
-    sum.name = 'Total'
     # Assign sum of all rows of DataFrame as a new row
-    summary_df = summary_df._append(sum.transpose())
+    summary_df = add_sum(summary_df)
     summary_df.to_excel(writer, sheet_name="summary", index=True)
     writer.close()
 
